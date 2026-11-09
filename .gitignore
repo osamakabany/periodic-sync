@@ -1,0 +1,9 @@
+*.gz
+*.jsonl
+*.json
+*.csv
+*.parquet
+data/
+out/
+.env*
+__pycache__/

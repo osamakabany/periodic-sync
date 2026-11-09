@@ -1,0 +1,43 @@
+name: sync
+on:
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: "slot HHMM"
+        required: false
+        default: ""
+      day:
+        description: "day YYYYMMDD"
+        required: false
+        default: ""
+      mode:
+        description: "tick or close"
+        required: false
+        default: "tick"
+
+concurrency:
+  group: sync-${{ github.event.inputs.slot || 'manual' }}-${{ github.event.inputs.mode || 'tick' }}
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: sync.py
+          sparse-checkout-cone-mode: false
+      - name: Run
+        env:
+          SLOT: ${{ github.event.inputs.slot }}
+          DAY: ${{ github.event.inputs.day }}
+          MODE: ${{ github.event.inputs.mode }}
+          SRC_URL_A: ${{ secrets.SRC_URL_A }}
+          SRC_URL_B: ${{ secrets.SRC_URL_B }}
+          SRC_KEYS: ${{ secrets.SRC_KEYS }}
+          S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_KEY_ID: ${{ secrets.S3_KEY_ID }}
+          S3_SECRET: ${{ secrets.S3_SECRET }}
+        run: python3 sync.py
